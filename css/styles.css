@@ -1,0 +1,16 @@
+#canvasContainer {
+    position: relative;
+}
+#canvasContainer canvas, #overlay {
+    position: absolute;
+}
+#overlay {
+    width: 20%;
+}
+
+.jumbotron {
+    padding: 2rem 1rem;
+    /* margin-bottom: 2rem; */
+    background-color: #e9ecef;
+    border-radius: .3rem;
+}
