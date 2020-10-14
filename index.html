@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			#c {
+				width: 100%;
+				height: 100%;
+				display: block;		
+	
+			}
+		</style>
+	</head>
+	<body>
+		<script src="js/lib/threejs/three.js"></script>
+		<script src="js/lib/threejs/GLTFLoader.js"></script>
+		<script src="js/lib/threejs/OrbitControls.js"></script>
+		<script src="js/util.js"></script>
+		<script src="js/lib/datgui/0.7.7/dat.gui.js"></script>
+		<script>
+			let scene, camera, renderer, controls, model, hemiLight, spotLight, dirLight, lavInsideLights, materialmodel;
+			
+			function init() {
+
+			  	scene =  new THREE.Scene();
+				scene.background = new THREE.Color(0xdddddd);
+				
+
+				camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 10000);
+				camera.position.set(1400,-150,-2600);
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.toneMapping = THREE.ReinhardToneMapping;
+				renderer.toneMappingExposure = 2.3;
+				renderer.shadowMap.enabled = true;
+				renderer.setSize(window.innerWidth, window.innerHeight);
+
+				controls = new THREE.OrbitControls(camera, renderer.domElement);
+				scene.add(new THREE.AxesHelper(500));
+				document.body.appendChild(renderer.domElement);
+
+				scene.add( new THREE.AmbientLight( 0xFFFF00, 0.3 ) );
+
+				spotLight = new THREE.SpotLight( 0xffffff, 0.5 );
+				spotLight.angle = Math.PI / 5;
+				spotLight.penumbra = 0.2;
+				spotLight.position.set(1400,-150, 2600);
+				spotLight.castShadow = true;
+				spotLight.shadow.camera.near = 2000;
+				spotLight.shadow.camera.far = 5000;
+				spotLight.shadow.mapSize.width = 1024;
+				spotLight.shadow.mapSize.height = 1024;
+				scene.add( spotLight );
+
+				dirLight = new THREE.DirectionalLight( 0xaabbff, 0.5 );
+				dirLight.position.set(1500,-2500, 1200 ).normalize();
+				dirLight.castShadow = true;
+				dirLight.shadow.camera.near = 1000;
+				dirLight.shadow.camera.far = 5000;
+
+				dirLight.shadow.camera.right = 1;
+				dirLight.shadow.camera.left = - 1;
+				dirLight.shadow.camera.top	= 1;
+				dirLight.shadow.camera.bottom = - 1;
+
+				dirLight.shadow.mapSize.width = 1024;
+				dirLight.shadow.mapSize.height = 1024;
+				scene.add( dirLight );
+
+				lavInsideLights = new THREE.PointLight( 0xFFFF00 , 2, 600);
+				lavInsideLights.position.set(10,0,25).normalize();
+				scene.add(lavInsideLights);
+
+
+				var light = new THREE.DirectionalLight(0xffffff);
+				light.position.set(-1,0,0).normalize();
+				scene.add(light);
+
+				var light = new THREE.DirectionalLight(0xffffff);
+				light.position.set(0,0.5,-0.5).normalize();
+				scene.add(light);
+
+				materialmodel = new THREE.MeshPhongMaterial({ 
+					color: 0xc9c0b1, 
+					specular: 0x222222, 
+					shininess: 75 
+				});
+
+
+				var loader = new THREE.GLTFLoader();
+				loader.load('models/new_main_lav.gltf', function(gltf) {
+					model = gltf.scene;
+					model.position.set(0,0,0);
+					model.traverse(n => {
+						if(n.isMesh){
+							n.castShadow = true;
+							n.receiveShadow = true;
+						}
+					});
+					scene.add(model);					
+					animate();
+				});
+
+			}
+			function animate(){
+				renderer.render(scene, camera);
+				// spotLight.position.set(
+				// 	camera.position.x + 10,
+				// 	camera.position.y + 10,
+				// 	camera.position.z + 10,
+				// )
+				requestAnimationFrame(animate);
+			} 
+			init();
+		</script>
+		<canvas id="c"></canvas>
+	</body>
+</html>
