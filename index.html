@@ -8,6 +8,7 @@
 		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<link rel="stylesheet" href="css/styles.css">
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 		<title>Airbus - 3d Lite Configurator</title>
 
 	</head>
@@ -19,10 +20,11 @@
 			</button>
 	  
 			<div class="collapse navbar-collapse" id="navbarsExampleDefault">
-			  <form class="form-inline my-2 my-lg-0">
+				
+			  <!-- <form class="form-inline my-2 my-lg-0">
 				<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
 				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-			  </form>
+			  </form> -->
 			</div>
 		  </nav>
 		<main role="main">
@@ -77,6 +79,23 @@
 		  
 						  </ul>
 					</div>
+                    <div id="cart">
+                        <div id="title" style="margin-top: 0px; margin-left:0px;">
+                            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Catalogue Prices</span>                    
+                              </h4>
+                        </div>
+                        <ul class="list-group mb-3">
+							<div id="listCartItems">
+
+							</div>
+
+                            <li class="list-group-item d-flex justify-content-between lh-condensed">
+                                <h2><span class="label label-default" id="totalPrice">0€</span></h2>
+                            </li>
+          
+                          </ul>
+                    </div>
 
 	
 				</div>
@@ -85,7 +104,7 @@
 		</main>
 	
 
-		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-3.5.0.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 		
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 		<script src="js/lib/threejs/three.js"></script>
@@ -95,7 +114,8 @@
 		<script src="js/lib/datgui/0.7.7/dat.gui.js"></script>
 		<script>
 			let scene, loader, camera, renderer, controls, model, hemiLight, spotLight, dirLight, lavInsideLights, materialmodel;
-			let modelCollections; modelPrices;
+			let modelCollections; let modelPrices;
+
 			
 			function init() {
 
@@ -169,6 +189,7 @@
 
 				loader = new THREE.GLTFLoader();
 				animate();
+
 				// loadGltfModels(loader, (modelsloadedInScene) => {					
 				// 	animate();
 				// });
@@ -177,10 +198,10 @@
 
 			modelCollections = {};
 			modelPrices = {
-				'new_main_lav.gltf' : "2000€",
-				'SoapDispenser.gltf' : "40€",
-				'ToiletPaperRoll.gltf' : "10€"
-			}
+				'new_main_lav.gltf' : {title: "Lavatory Module" , price: 2000},
+				'SoapDispenser.gltf' : {title: "Soap Dispenser" , price: 50},
+				'ToiletPaperRoll.gltf' : {title: "Toilet Paper Roll" , price: 10}
+			};
 			
 			function loadProduct(modelname){				
 				if(!(modelname in modelCollections)){
@@ -198,31 +219,88 @@
 						scene.add(model);
 						modelCollections[modelname] = {
 							uuid: model.uuid,
-							price: modelPrices[modelname] };					
+							name: modelname,
+							description: "Brief Description",
+							displayTitle: modelPrices[modelname].title,
+							price: modelPrices[modelname].price,
+							included: true,
+							addedToCart: false };	
+						updateCatalogue();				
 			  		});
 				} else {
 					console.log('model already existed');
 					scene.children.forEach(childElement => {
 						if(childElement.uuid == modelCollections[modelname].uuid){
-							childElement.visible = true
+							childElement.visible = true;
+							modelCollections[modelname].included = true;
+							updateCatalogue();
 						}
 					});
 				}	
+				
 				animate();
 			}
 
 			function removeProduct(modelname){
+				removeElementwithId(2);
 				if(modelname in modelCollections){
 					scene.children.forEach(childElement => {
 						if(childElement.uuid == modelCollections[modelname].uuid){
 							childElement.visible = false
+							modelCollections[modelname].included = false;
 						}
 					});
+					updateCatalogue();
 					animate();
 				}else{
 					console.log('Model to be removed was never loaded');
 				}
 			}
+
+			function updateCatalogue(changeType) {
+				let totalPrice = 0;
+				$("#listCartItems").html("");
+				for (const [key, value] of Object.entries(modelCollections)) {
+					
+					totalPrice =  totalPrice + value.price;
+					if((value.included) ) {
+						
+							let html_template = `
+										<li id="${value.uuid}" class="list-group-item d-flex justify-content-between lh-condensed">
+											<div>
+												<h6 class="my-0"><span class="item">${value.displayTitle}</span></h6>     
+												<small class="text-muted">Brief description</small>                     
+											</div>
+											<span class="text-muted"> 
+												<h2><span class="label label-default itemPrice">${value.price}€</span></h2>
+											</span>
+										</li>`;
+					
+						$("#listCartItems").append(html_template);
+						value.addedToCart = true;						
+
+					}else {
+						let id = "#" + value.uuid;
+						$(id).remove();
+						value.addedToCart = false;	
+						totalPrice = totalPrice - value.price;
+					}
+
+					$('#totalPrice').text(totalPrice + "€");
+					if(totalPrice == 0){
+						$("#listCartItems").html("");
+						let template = `
+						<div id="noItems" class="alert alert-success" role="alert">
+							No Items added to cart 
+						</div>`;
+						$("#listCartItems").append(template);
+					}else {
+						$("#noItems").remove();
+					}
+				}
+
+			}
+
 
 			function loadGltfModels(loader, callback) {
 				const modelDir = 'models/';
@@ -256,9 +334,9 @@
 				requestAnimationFrame(animate);
 			}
 
-			function removeElementwithId() {
-				let id = 2;
-				$("#2").remove();
+			function removeElementwithId(id) {
+				let hashid = "#"+id;
+				$(hashid).hide();
 			}
 			
 			//init();
