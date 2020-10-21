@@ -14,3 +14,10 @@
     background-color: #e9ecef;
     border-radius: .3rem;
 }
+
+#cart {
+    position: absolute;
+    top :120px;
+    width: 270px;
+    left: 1100px;
+}

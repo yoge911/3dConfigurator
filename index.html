@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		
 		<!-- Bootstrap CSS -->
+		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<link rel="stylesheet" href="css/styles.css">
 		<title>Airbus - 3d Lite Configurator</title>
@@ -50,14 +51,24 @@
 							</li>
 							<li class="list-group-item d-flex justify-content-between lh-condensed">
 							  <div>
-								<h6 class="my-0">Lavatory Door</h6>
+								<h6 class="my-0">Soap Dispenser</h6>
 								<small class="text-muted">Brief description</small>
 							  </div>
 							  <span class="text-muted"> 
-								  <button type="button" class="btn btn-info" onclick="loadProduct('new_door_lav.gltf')">+</button>
-								  <button type="button" class="btn btn-dark" onclick="removeProduct('new_door_lav.gltf')">-</button>
+								  <button type="button" class="btn btn-info" onclick="loadProduct('SoapDispenser.gltf')">+</button>
+								  <button type="button" class="btn btn-dark" onclick="removeProduct('SoapDispenser.gltf')">-</button>
 							  </span>
 							</li>
+							<li class="list-group-item d-flex justify-content-between lh-condensed">
+								<div>
+								  <h6 class="my-0">Toilet Paper Roll</h6>
+								  <small class="text-muted">Brief description</small>
+								</div>
+								<span class="text-muted"> 
+									<button type="button" class="btn btn-info" onclick="loadProduct('ToiletPaperRoll.gltf')">+</button>
+									<button type="button" class="btn btn-dark" onclick="removeProduct('ToiletPaperRoll.gltf')">-</button>
+								</span>
+							  </li>
 							<li class="list-group-item d-flex justify-content-between lh-condensed">
 							  <div>
 								  <button  type="button" class="btn btn-primary" onclick="init();">Load Configurator</button>
@@ -66,6 +77,7 @@
 		  
 						  </ul>
 					</div>
+
 	
 				</div>
 	
@@ -83,7 +95,7 @@
 		<script src="js/lib/datgui/0.7.7/dat.gui.js"></script>
 		<script>
 			let scene, loader, camera, renderer, controls, model, hemiLight, spotLight, dirLight, lavInsideLights, materialmodel;
-			let modelCollections;
+			let modelCollections; modelPrices;
 			
 			function init() {
 
@@ -164,6 +176,12 @@
 			}
 
 			modelCollections = {};
+			modelPrices = {
+				'new_main_lav.gltf' : "2000€",
+				'SoapDispenser.gltf' : "40€",
+				'ToiletPaperRoll.gltf' : "10€"
+			}
+			
 			function loadProduct(modelname){				
 				if(!(modelname in modelCollections)){
 					const modelDir = 'models/';
@@ -178,11 +196,14 @@
 							};
 						});
 						scene.add(model);
-						modelCollections[modelname] = model.uuid;					
+						modelCollections[modelname] = {
+							uuid: model.uuid,
+							price: modelPrices[modelname] };					
 			  		});
 				} else {
+					console.log('model already existed');
 					scene.children.forEach(childElement => {
-						if(childElement.uuid == modelCollections[modelname]){
+						if(childElement.uuid == modelCollections[modelname].uuid){
 							childElement.visible = true
 						}
 					});
@@ -193,7 +214,7 @@
 			function removeProduct(modelname){
 				if(modelname in modelCollections){
 					scene.children.forEach(childElement => {
-						if(childElement.uuid == modelCollections[modelname]){
+						if(childElement.uuid == modelCollections[modelname].uuid){
 							childElement.visible = false
 						}
 					});
@@ -233,6 +254,11 @@
 				// 	camera.position.z + 10,
 				// )
 				requestAnimationFrame(animate);
+			}
+
+			function removeElementwithId() {
+				let id = 2;
+				$("#2").remove();
 			}
 			
 			//init();
